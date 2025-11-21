@@ -13,7 +13,7 @@ return [
         "items" => [
             [
                 "text" => "Новости парсера",
-                "url" => "kv_parser_news_list.php?lang=".LANG,
+                "url" => "kv_news_list.php?lang=".LANG,
                 "more_url" => [],
                 "title" => "Список новостей",
             ],

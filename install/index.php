@@ -62,11 +62,20 @@ class kv_parser extends CModule
     public function InstallFiles()
     {
         CopyDirFiles($_SERVER['DOCUMENT_ROOT'] . '/local/modules/'.$this->MODULE_ID.'/install/components', $_SERVER['DOCUMENT_ROOT'] . '/local/components', true, true);
-    }
+
+		$proxyFilePath = $_SERVER['DOCUMENT_ROOT'] . '/bitrix/admin/kv_news_list.php';
+		$content = '<?php' . PHP_EOL . 'require_once($_SERVER["DOCUMENT_ROOT"]."/local/modules/' . $this->MODULE_ID . '/admin/kv_news_list.php");' . PHP_EOL;
+		file_put_contents($proxyFilePath, $content);
+	}
 
     public function UnInstallFiles()
     {
         DeleteDirFilesEx('/local/components/kv');
+
+		if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bitrix/admin/kv_news_list.php')) {
+			unlink($_SERVER['DOCUMENT_ROOT'] . '/bitrix/admin/kv_news_list.php');
+		}
+
         return true;
     }
 
@@ -83,8 +92,13 @@ class kv_parser extends CModule
     {
         ModuleManager::registerModule($this->MODULE_ID);
 
-		Option::set($this->MODULE_ID, "SOURCE_URL");
-		Option::set($this->MODULE_ID, "NEWS_LIMIT");
+		// Настройки по умолчанию
+		include $_SERVER["DOCUMENT_ROOT"].'/local/modules/kv.parser/default_option.php';
+		if (!empty($kv_parser_default_option) && is_array($kv_parser_default_option)) {
+			foreach ($kv_parser_default_option as $option => $value) {
+				Option::set($this->MODULE_ID, $option, $value);
+			}
+		}
 
 		$this->InstallFiles();
 		$this->InstallDB();

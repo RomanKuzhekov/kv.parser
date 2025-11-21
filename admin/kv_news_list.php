@@ -18,7 +18,7 @@ if ($POST_RIGHT == "D") {
 $APPLICATION->SetTitle("Новости из парсера");
 
 // Таблица и сортировка
-$sTableID = "kv_parser_news_list";
+$sTableID = "news_list";
 $oSort = new CAdminSorting($sTableID, "ID", "desc");
 $lAdmin = new CAdminList($sTableID, $oSort);
 

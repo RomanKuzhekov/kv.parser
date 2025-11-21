@@ -5,8 +5,6 @@ use Bitrix\Main\Loader;
 $arModule = [
     'iblock',
     'highloadblock',
-    'sale',
-    'catalog'
 ];
 
 foreach($arModule as $moduleId){
@@ -25,7 +23,7 @@ return [
     'services' => [
 		'value' => [
             'newservice' => [
-                'className' => Kv\Parser\Services\NewsService::class,
+                'className' => \Kv\Parser\Services\NewsService::class,
 			],
             'parser' => [
                 'className' => \Kv\Parser\Parsers\Parser::class,
