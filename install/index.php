@@ -6,6 +6,8 @@ use Bitrix\Main\Config\Option;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Application;
 use Kv\Parser\Db\NewsTable;
+use Bitrix\Main\EventManager;
+use Kv\Parser\Events\ParserHandler;
 
 Loc::loadMessages(__FILE__);
 
@@ -79,20 +81,39 @@ class kv_parser extends CModule
         return true;
     }
 
+	public function InstallEvents()
+	{
+		EventManager::getInstance()->registerEventHandler('main', 'OnAfterUserAdd', $this->MODULE_ID, ParserHandler::class, 'parserRun');
+	}
 
-	// Зарегить событие которое будет запускать парсер после добавления новости
+	public function UnInstallEvents()
+	{
+		EventManager::getInstance()->unRegisterEventHandler('main', 'OnAfterUserAdd', $this->MODULE_ID, ParserHandler::class, 'parserRun');
+	}
 
+	public function installAgents()
+	{
+		CAgent::addAgent(
+			"\Kv\Parser\Agents\NewsHandler::DeleteOldNews();",
+			'main',
+			"N",
+			86400,
+			"",
+			'Y',
+			"",
+			100
+		);
+	}
 
-
-
-	// Зарегить агента который будет запускаться раз в день и очищать старые данные
-
+	public function unInstallAgents()
+	{
+		\CAgent::RemoveModuleAgents($this->MODULE_ID);
+	}
 
     public function DoInstall()
     {
         ModuleManager::registerModule($this->MODULE_ID);
 
-		// Настройки по умолчанию
 		include $_SERVER["DOCUMENT_ROOT"].'/local/modules/kv.parser/default_option.php';
 		if (!empty($kv_parser_default_option) && is_array($kv_parser_default_option)) {
 			foreach ($kv_parser_default_option as $option => $value) {
@@ -100,12 +121,14 @@ class kv_parser extends CModule
 			}
 		}
 
+		$this->installAgents();
 		$this->InstallFiles();
 		$this->InstallDB();
     }
 
     public function DoUninstall()
     {
+		$this->unInstallAgents();
         $this->UnInstallDB();
         $this->UnInstallFiles();
 
